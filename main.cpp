@@ -1,4 +1,4 @@
-#include<graph.h>
+#include<HashTable.h>
 
 
 int main() {
@@ -11,7 +11,6 @@ int main() {
     graph.add_vertex(5);
 
     graph.add_edge(2, 1, 1);
-    graph.add_edge(2, 1, 1);
     graph.add_edge(3, 1, 3);
     graph.add_edge(1, 4, 3);
     graph.add_edge(4, 3, 1);
@@ -21,17 +20,17 @@ int main() {
     graph.add_edge(5, 2, 2);
 
     graph.print();
+    cout << "\n";
+    graph.remove_vertex(2);
+    graph.remove_edge(4, 3);
 
-    auto action = [](const int& v) {  //lambda
-        std::cout << v << " ";
-    };
-
-    std::cout << "Test BFS:\n";
-    graph.bfs(1, action);
-    cout << endl;
-
-    cout << "\nTest walk." << endl;
-    std::vector<Graph<int, int>::Edge> path = graph.walk(1, 3);
+    graph.print();
+    cout << "\n";
+    cout << "Walk Test" << endl;
+    graph.walk(1);
+    cout << "\nTest Dijkstra." << endl;
+    std::vector<Graph<int, int>::Edge> path = graph.dijk(1, 3);
+    auto sum = 0;
     std::cout << "Shortest path for from 1, to 3:" << std::endl;
     if (path.empty()) {
         std::cout << "No path found." << std::endl;
@@ -39,13 +38,15 @@ int main() {
     else {
         for (const auto& edge : path) {
             std::cout << "From: " << edge.from << " To: " << edge.to << " Distance: " << edge.distance << std::endl;
+            sum += edge.distance;
         }
+        cout << sum;
     }
 
     cout << "\nFind optimal location." << endl;
-    int optimalLocation = graph.find_optimal_warehouse();
+    int optimalWarehouse = graph.find_optimal_warehouse();
 
-    cout << "Optimal warehouse location: " << optimalLocation << endl;
+    cout << "Optimal warehouse location: " << optimalWarehouse << endl;
 
     return 0;
 }
