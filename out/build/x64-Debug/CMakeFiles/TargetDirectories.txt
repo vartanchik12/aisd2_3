@@ -1,0 +1,3 @@
+C:/Users/PCmen/Desktop/Lab6AiSD-main/Lab6AiSD-main/out/build/x64-Debug/CMakeFiles/main.dir
+C:/Users/PCmen/Desktop/Lab6AiSD-main/Lab6AiSD-main/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/PCmen/Desktop/Lab6AiSD-main/Lab6AiSD-main/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir

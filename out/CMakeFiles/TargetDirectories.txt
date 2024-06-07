@@ -1,0 +1,3 @@
+/home/gripulia/Desktop/huina/out/CMakeFiles/main.dir
+/home/gripulia/Desktop/huina/out/CMakeFiles/edit_cache.dir
+/home/gripulia/Desktop/huina/out/CMakeFiles/rebuild_cache.dir
