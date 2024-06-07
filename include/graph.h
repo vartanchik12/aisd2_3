@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <iostream>
 #include <algorithm> 
 #include <vector>
@@ -44,7 +44,7 @@ public:
 		_edges.erase(v);
 		for (auto& pair : _edges) {
 			auto& edges = pair.second;
-			edges.remove_if([v](const Edge& edge) {return edge.to == v; });
+			edges.erase(std::remove_if(edges.begin(), edges.end(), [v](const Edge& e) {return e.to == v; }), edges.end());
 		}
 		return true;
 	}
@@ -102,7 +102,7 @@ public:
 		return _edges.at(v).size();
 	}
 
-	std::vector<Edge> walk(const Vertex& from, const Vertex& to) const {
+	std::vector<Edge> dijk(const Vertex& from, const Vertex& to) const {
 		if (!has_vertex(from) || !has_vertex(to)) {
 			return {};
 		}
@@ -162,7 +162,7 @@ public:
 		return shortest_path;
 	}
 
-	std::vector<Vertex> bfs(const Vertex& start_vertex, std::function<void(const Vertex&)> action) const {
+	std::vector<Vertex> walk(const Vertex& start_vertex) const {
 		std::queue<Vertex> q;
 		std::unordered_map<Vertex, Color> color;
 		std::unordered_map<Vertex, Vertex> parent;
@@ -182,9 +182,7 @@ public:
 			Vertex u = q.front();
 			q.pop();
 			visited_vertices.push_back(u);
-			if (action) {
-				action(u);
-			}
+			cout << u << endl;
 			for (const auto& edge : _edges.at(u)) {
 				Vertex v = edge.to;
 				if (color[v] == Color::White) {
@@ -199,51 +197,9 @@ public:
 		return visited_vertices;
 	}
 
-	std::vector<Edge> shortest_path(const Vertex& from, const Vertex& to) const {
-		std::unordered_map<Vertex, Distance> distance;
-		std::unordered_map<Vertex, Vertex> predecessor;
-
-		for (const auto& v : _vertices) {
-			distance[v] = INF;
-		}
-		distance[from] = 0;
-
-		for (size_t i = 0; i < _vertices.size() - 1; ++i) {
-			for (const auto& vertex : _vertices) {
-				for (const auto& edge : _edges.at(vertex)) {
-					if (distance[edge.from] + edge.distance < distance[edge.to]) {
-						distance[edge.to] = distance[edge.from] + edge.distance;
-						predecessor[edge.to] = edge.from;
-					}
-				}
-			}
-		}
-
-		for (const auto& vertex : _vertices) {
-			for (const auto& edge : _edges.at(vertex)) {
-				if (distance[edge.from] + edge.distance < distance[edge.to]) {
-					throw std::runtime_error("Îòðèöàòåëüíûé öèêë îáíàðóæåí");
-				}
-			}
-		}
-
-		std::vector<Edge> path;
-		Vertex cur = to;
-		while (cur != from) {
-			for (const auto& edge : _edges.at(predecessor[cur])) {
-				if (edge.to == cur) {
-					path.push_back(edge);
-					break;
-				}
-			}
-			cur = predecessor[cur];
-		}
-		std::reverse(path.begin(), path.end());
-		return path;
-	}
 
 	Distance length_shortest_path(const Vertex& from, const Vertex& to) const {
-		std::vector<Edge> edges = shortest_path(from, to);
+		std::vector<Edge> edges = dijk(from, to);
 		Distance len = 0;
 		for (const auto& edge : edges) {
 			len += edge.distance;
@@ -270,28 +226,44 @@ public:
 			else {
 				cout << "No outgoing edges." << endl;
 			}
-			cout << "-------------------------" << endl;
 		}
 	}
 
+	Vertex find_optimal_warehouse() {
+		std::unordered_map<Vertex, double> avg_distances;
 
-	Vertex find_optimal_warehouse() const {
-		Distance min_max_distance = std::numeric_limits<Distance>::max();
-		Vertex optimal_warehouse;
+		std::vector<Vertex> vertices_ = _vertices;
 
-		for (const auto& pair : vertices()) {
-			Distance max_distance = 0;
+		for (const auto& v : vertices_) {
+			double total_distance = 0.0;
+			int num_neighbors = 0;
 
-			for (const auto& pair2 : vertices()) {
-				if (pair != pair2) {
-					Distance distance = length_shortest_path(pair, pair2);
-					max_distance = std::max(max_distance, distance);
+			for (const auto& u : vertices_) {
+				if (u != v) {
+					std::vector<Edge> path = dijk(v, u);
+					double path_distance = 0.0;
+					for (const auto& edge : path) {
+						path_distance += edge.distance;
+					}
+					total_distance += path_distance;
+					num_neighbors++;
 				}
 			}
+			if (num_neighbors > 0) {
+				avg_distances[v] = total_distance / num_neighbors;
+			}
+		}
 
-			if (max_distance < min_max_distance) {
-				min_max_distance = max_distance;
-				optimal_warehouse = pair;
+		Vertex optimal_warehouse;
+		double max_avg_distance = 10000000000;
+
+		for (const auto& pair : avg_distances) {
+			const Vertex& v = pair.first;
+			double distance = pair.second;
+
+			if (distance < max_avg_distance) {
+				max_avg_distance = distance;
+				optimal_warehouse = v;
 			}
 		}
 
